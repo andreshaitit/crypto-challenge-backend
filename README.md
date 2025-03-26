@@ -1,9 +1,12 @@
 # crypto-backend
 
-Este es el backend del proyecto Crypto Challenge, desarrollado con Node.js. Proporciona una API para gestionar criptomonedas, incluyendo funcionalidades como agregar, editar y eliminar criptomonedas. También incluye autenticación de usuarios.
+Este es el backend del proyecto Crypto Challenge, desarrollado con Node.js y PostgreSQL. Proporciona una API para gestionar criptomonedas, incluyendo funcionalidades como agregar, editar y eliminar criptomonedas. También incluye autenticación de usuarios.
+
+---
 
 ## Estructura del Proyecto
 
+```
 crypto-backend/
 ├── database/
 │   └── crypto.sql       # Archivo SQL para restaurar la base de datos
@@ -25,6 +28,9 @@ crypto-backend/
 ├── index.js             # Punto de entrada del servidor
 ├── package.json         # Dependencias y scripts del proyecto
 └── README.md            # Documentación del proyecto
+```
+
+---
 
 ## Requisitos Previos
 
@@ -33,6 +39,8 @@ Antes de comenzar, asegúrate de tener instalados los siguientes programas en tu
 - [Node.js](https://nodejs.org/) (versión 20 o superior)
 - [npm](https://www.npmjs.com/) (incluido con Node.js)
 - [PostgreSQL](https://www.postgresql.org/) (versión 15 o superior)
+
+---
 
 ## Configuración del Proyecto
 
@@ -49,7 +57,7 @@ cd crypto-challenge-backend
 
 Crea un archivo `.env` en la raíz del proyecto y agrega las siguientes variables de entorno:
 
-```env
+```properties
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
@@ -58,27 +66,65 @@ DB_NAME=crypto
 NODE_ENV=development
 ```
 
-Asegúrate de reemplazar tu_contraseña con la contraseña de tu usuario de PostgreSQL.
-
+> **Nota:** Reemplaza `tu_contraseña` con la contraseña de tu usuario de PostgreSQL.
 
 ### 3. Instalar Dependencias
 
 Instala las dependencias del proyecto ejecutando:
 
+```bash
 npm install
-
+```
 
 ### 4. Configurar la Base de Datos
 
-Crea una base de datos en PostgreSQL llamada crypto 
+#### Crear la Base de Datos
 
-### Restaurar la Base de Datos
+Crea una base de datos en PostgreSQL llamada `crypto`:
 
-Restaura la base de datos desde el archivo crypto.sql incluido en este proyecto en la carpeta database
+```bash
+createdb -h localhost -p 5432 -U postgres crypto
+```
+
+#### Restaurar la Base de Datos
+
+Restaura la base de datos desde el archivo `crypto.sql` incluido en este proyecto en la carpeta `database`:
+
+```bash
+psql -h localhost -p 5432 -U postgres -d crypto -f crypto.sql
+```
 
 ### 5. Iniciar el Servidor
 
 Inicia el servidor ejecutando:
-npm start
 
-El backend estará disponible en http://localhost:3000 (o el puerto configurado en el archivo .env).
+```bash
+npm start
+```
+
+El backend estará disponible en [http://localhost:3000] (o el puerto configurado en el archivo `.env`).
+
+---
+
+## Endpoints de la API
+
+### Autenticación
+
+- `POST /auth/login`: Inicia sesión con un usuario y contraseña.
+- `POST /auth/register`: Registra un usuario y contraseña.
+
+### Gestión de Usuarios
+
+- `GET /users`: Obtiene todos los usuarios.
+- `POST /users`: Crea un nuevo usuario.
+- `PUT /users/:id`: Actualiza un usuario existente.
+- `DELETE /users/:id`: Elimina un usuario.
+
+### Gestión de Criptomonedas
+
+- `GET /cryptos`: Obtiene todas las criptomonedas.
+- `POST /cryptos`: Agrega una nueva criptomoneda.
+- `PUT /cryptos/:id`: Edita una criptomoneda existente.
+- `DELETE /cryptos/:id`: Elimina una criptomoneda.
+
+---
