@@ -1,12 +1,28 @@
-const express = require('express');
+import express, { Request, Response, NextFunction } from 'express';
+import { AppDataSource } from '../config/data-source';
+import { Users } from '../entities/users';
+import { body, validationResult } from 'express-validator';
+import bcrypt from 'bcrypt';
+
 const router = express.Router();
-const { AppDataSource } = require('../config/data-source');
-const { Users } = require('../entities/users');
-const { body, validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
+
+interface UserRequestBody {
+  username: string;
+  password: string;
+}
+
+// Middleware para manejar validaciones
+const validateRequest = (req: Request, res: Response, next: NextFunction): void => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
+  next();
+};
 
 // Obtener todos los usuarios
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const usersRepository = AppDataSource.getRepository(Users);
     const users = await usersRepository.find();
@@ -23,12 +39,8 @@ router.post(
     body('username').isString().notEmpty().withMessage('El nombre de usuario es obligatorio'),
     body('password').isString().notEmpty().withMessage('La contraseña es obligatoria'),
   ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
+  validateRequest,
+  async (req: Request<{}, {}, UserRequestBody>, res: Response): Promise<void> => {
     try {
       const usersRepository = AppDataSource.getRepository(Users);
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -42,12 +54,13 @@ router.post(
 );
 
 // Actualizar un usuario
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request<{ id: string }, {}, UserRequestBody>, res: Response): Promise<void> => {
   try {
     const usersRepository = AppDataSource.getRepository(Users);
     const user = await usersRepository.findOneBy({ id: parseInt(req.params.id) });
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      res.status(404).json({ message: 'Usuario no encontrado' });
+      return;
     }
     usersRepository.merge(user, req.body);
     const result = await usersRepository.save(user);
@@ -58,7 +71,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Eliminar un usuario
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   try {
     const usersRepository = AppDataSource.getRepository(Users);
     const result = await usersRepository.delete(req.params.id);
@@ -68,4 +81,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

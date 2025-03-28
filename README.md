@@ -1,6 +1,6 @@
 # crypto-backend
 
-Este es el backend del proyecto Crypto Challenge, desarrollado con Node.js y PostgreSQL. Proporciona una API para gestionar criptomonedas, incluyendo funcionalidades como agregar, editar y eliminar criptomonedas. También incluye autenticación de usuarios.
+Este es el backend del proyecto **Crypto Challenge**, desarrollado con **Node.js** y **PostgreSQL**. Proporciona una API para gestionar criptomonedas, incluyendo funcionalidades como agregar, editar y eliminar criptomonedas. También incluye autenticación de usuarios.
 
 ---
 
@@ -12,21 +12,21 @@ crypto-backend/
 │   └── crypto.sql       # Archivo SQL para restaurar la base de datos
 ├── src/
 │   ├── config/
-│   │   └── data-source.js # Configuración de la conexión a la base de datos
+│   │   └── data-source.ts # Configuración de la conexión a la base de datos
 │   ├── entities/        # Entidades de la base de datos
-│   │   ├── User.js       # Entidad para la tabla de usuarios
-│   │   └── Crypto.js     # Entidad para la tabla de criptomonedas
+│   │   ├── User.ts       # Entidad para la tabla de usuarios
+│   │   └── Crypto.ts     # Entidad para la tabla de criptomonedas
 │   ├── middleware/
-│   │   └── auth.js       # Middleware de autenticación
+│   │   └── auth.ts       # Middleware de autenticación
 │   ├── routes/          # Rutas de la API
-│   │   ├── users.js      # Rutas para usuarios
-│   │   ├── cryptos.js    # Rutas para criptomonedas
-│   │   └── auth.js       # Rutas para autenticación
-│   └── app.js           # Archivo principal de configuración de la aplicación
+│   │   ├── users.ts      # Rutas para usuarios
+│   │   ├── cryptos.ts    # Rutas para criptomonedas
+│   │   └── auth.ts       # Rutas para autenticación
+│   └── index.ts         # Archivo principal de configuración de la aplicación
 ├── .env                 # Variables de entorno
 ├── .gitignore           # Archivos ignorados por Git
-├── index.js             # Punto de entrada del servidor
 ├── package.json         # Dependencias y scripts del proyecto
+├── tsconfig.json        # Configuración de TypeScript
 └── README.md            # Documentación del proyecto
 ```
 
@@ -66,7 +66,7 @@ DB_NAME=crypto
 NODE_ENV=development
 ```
 
-> **Nota:** Reemplaza `tu_contraseña` con la contraseña de tu usuario de PostgreSQL.
+> **Nota:** Reemplaza `tu_contraseña` con la contraseña de tu usuario de PostgreSQL
 
 ### 3. Instalar Dependencias
 
@@ -94,17 +94,25 @@ Restaura la base de datos desde el archivo `crypto.sql` incluido en este proyect
 psql -h localhost -p 5432 -U postgres -d crypto -f crypto.sql
 ```
 
-### 5. Iniciar el Servidor
+### 5. Compilar el Proyecto
 
-Inicia el servidor ejecutando:
+Antes de ejecutar el servidor, compila el código TypeScript a JavaScript:
+
+```bash
+npx tsc
+```
+
+Esto generará la carpeta `dist/` con los archivos compilados.
+
+### 6. Iniciar el Servidor
+
+Ejecuta el servidor desde la carpeta `dist`:
 
 ```bash
 npm start
 ```
 
-El backend estará disponible en [http://localhost:3000] (o el puerto configurado en el archivo `.env`).
-
----
+El backend estará disponible en [http://localhost:3000](http://localhost:3000) (o el puerto configurado en el archivo `.env`).
 
 ## Endpoints de la API
 
@@ -126,5 +134,3 @@ El backend estará disponible en [http://localhost:3000] (o el puerto configurad
 - `POST /cryptos`: Agrega una nueva criptomoneda.
 - `PUT /cryptos/:id`: Edita una criptomoneda existente.
 - `DELETE /cryptos/:id`: Elimina una criptomoneda.
-
----

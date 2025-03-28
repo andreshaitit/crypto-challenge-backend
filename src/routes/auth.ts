@@ -1,13 +1,20 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const { AppDataSource } = require('../config/data-source');
-const { Users } = require('../entities/users');
-const { body, validationResult } = require('express-validator');
+import express, { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { AppDataSource } from '../config/data-source';
+import { Users } from '../entities/users';
+import { body, validationResult } from 'express-validator';
+
 const router = express.Router();
 
+// Interfaz para el cuerpo de la solicitud de login
+interface LoginRequestBody {
+  username: string;
+  password: string;
+}
+
 // Ruta para iniciar sesión
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request<{}, {}, LoginRequestBody>, res: Response): Promise<void> => {
   const { username, password } = req.body;
 
   try {
@@ -15,33 +22,43 @@ router.post('/login', async (req, res) => {
     const user = await usersRepository.findOneBy({ username });
 
     if (!user) {
-      return res.status(401).json({ message: 'Credenciales incorrectas' });
+      res.status(401).json({ message: 'Credenciales incorrectas' });
+      return;
+    }
+
+    if (typeof user.password !== 'string') {
+      res.status(500).json({ message: 'Error inesperado: contraseña inválida' });
+      return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Credenciales incorrectas' });
+      res.status(401).json({ message: 'Credenciales incorrectas' });
+      return;
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, 'tu_secreto_jwt', { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET || 'default_secret', {
+      expiresIn: '1h',
+    });
     res.json({ token });
   } catch (error) {
     res.status(500).json({ message: 'Error en el servidor', error });
   }
 });
 
-// Ruta para crear un nuevo usuario
+// Ruta para registrar un nuevo usuario
 router.post(
   '/register',
   [
     body('username').isString().notEmpty().withMessage('El nombre de usuario es obligatorio'),
     body('password').isString().notEmpty().withMessage('La contraseña es obligatoria'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ errors: errors.array() });
+      return;
     }
 
     try {
@@ -56,4 +73,4 @@ router.post(
   }
 );
 
-module.exports = router;
+export default router;
